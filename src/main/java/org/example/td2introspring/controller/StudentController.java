@@ -24,14 +24,28 @@ public class StudentController {
     }
 
     @GetMapping("/students")
-    public ResponseEntity<String> getStudentNames(@RequestHeader(value = "Accept", defaultValue = "text/plain") String acceptHeader) {
-        if(!acceptHeader.equals("text/plain")) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Format non supporté");
+    public ResponseEntity<?> getStudents(
+            @RequestHeader(value = "Accept", required = false) String acceptHeader) {
+
+        if (acceptHeader == null) {
+            return ResponseEntity.status(400).body("Header Accept manquant");
         }
 
-        String names = studentsList.stream()
-                .map(Student::getFirstName)
-                .collect(Collectors.joining(", "));
-        return ResponseEntity.ok(names);
+        if (!acceptHeader.equals("text/plain") && !acceptHeader.equals("application/json")) {
+            return ResponseEntity.status(501).body("Format non supporté");
+        }
+
+        try {
+            if (acceptHeader.equals("application/json")) {
+                return ResponseEntity.ok(studentsList);
+            } else {
+                String names = studentsList.stream()
+                        .map(Student::getFirstName)
+                        .collect(Collectors.joining(", "));
+                return ResponseEntity.ok(names);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erreur serveur");
+        }
     }
 }
