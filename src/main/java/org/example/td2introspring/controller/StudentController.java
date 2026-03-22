@@ -14,9 +14,13 @@ public class StudentController {
     private List<Student> studentsList = new ArrayList<>();
 
     @PostMapping("/students")
-    public Student createStudent(@RequestBody Student student) {
-        studentsList.add(student);
-        return student;
+    public ResponseEntity<?> createStudents(@RequestBody List<Student> students) {
+        try {
+            studentsList.addAll(students);
+            return ResponseEntity.status(201).body(studentsList);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erreur serveur");
+        }
     }
 
     @GetMapping("/students")
